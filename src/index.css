@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  cursor: default;
+}
+
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+
+.window-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.window-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.window-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+
+.no-scrollbar {
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; 
+}
+
+
+.traffic-light-glyph {
+  opacity: 0;
+  transition: opacity 120ms ease;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  user-select: none;
+}
+.traffic-lights-group:hover .traffic-light-glyph {
+  opacity: 1;
+}
+
+
+.menu-item {
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: default;
+  transition: background 150ms ease;
+}
+.menu-item:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+
+.dock-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  margin: 3px auto 0;
+}
+
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: default;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 100ms ease;
+  width: 96px;
+}
+.desktop-icon.selected {
+  background: rgba(0, 122, 255, 0.25);
+}
+
+
+.react-resizable-handle {
+  z-index: 10;
+}
+
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
