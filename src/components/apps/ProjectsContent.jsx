@@ -83,7 +83,8 @@ export const PROJECTS_DATA = {
       { id: 'img1', src: chatrlinkImg1.src || chatrlinkImg1, label: '1.png' },
       { id: 'img2', src: chatrlinkImg2.src || chatrlinkImg2, label: '2.png' },
       { id: 'img3', src: chatrlinkImg3.src || chatrlinkImg3, label: '3.png' },
-    ]
+    ],
+    githubUrl: 'https://github.com/Hetp04/Chatr'
   }
 }
 
