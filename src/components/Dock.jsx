@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { getWindowContent } from './WindowContent'
+import { PROJECTS_DATA } from './apps/ProjectsContent'
+import { saveLastOpened } from '../lib/supabase'
 
 import finderImg from '../assets/Finder__Golden_Gate__QBpqXA0Dmz-e345c75b9d.png'
 import safariImg from '../assets/icnsFile_6d51b050d5decc5c7f98b8d851bbd565_Safari.png'
@@ -27,6 +29,129 @@ export const DOCK_ICONS = [
   { id: 'Notes', label: 'Notes', src: notesImg.src, fallbackColor: 'linear-gradient(145deg, #fced82 0%, #fced82 100%)' },
 ]
 
+// Build a flat list of all images across all projects for the context menu
+function getAllFinderImages() {
+  const items = []
+  Object.values(PROJECTS_DATA).forEach(proj => {
+    proj.images.forEach(img => {
+      items.push({
+        appId: `Preview_${proj.folderName}_${img.id}`,
+        label: img.label,
+        src: img.src,
+        project: proj.folderName,
+      })
+    })
+  })
+  return items
+}
+
+function FinderContextMenu({ onOpenImage, onClose }) {
+  const items = getAllFinderImages()
+  const menuRef = useRef(null)
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) onClose()
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [onClose])
+
+  return (
+    <motion.div
+      ref={menuRef}
+      initial={{ opacity: 0, scale: 0.95, y: 8 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: 8 }}
+      transition={{ duration: 0.14, ease: [0.25, 0.46, 0.45, 0.94] }}
+      style={{
+        position: 'absolute',
+        bottom: 'calc(100% + 14px)',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'rgba(242, 242, 247, 0.96)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderRadius: '10px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10), inset 0 0.5px 0 rgba(255,255,255,0.6)',
+        minWidth: '220px',
+        maxWidth: '280px',
+        overflow: 'hidden',
+        zIndex: 9999,
+        border: '0.5px solid rgba(0,0,0,0.1)',
+      }}
+    >
+      {/* Header */}
+      <div style={{
+        padding: '6px 12px 4px',
+        fontSize: '11px',
+        fontWeight: 600,
+        color: '#8e8e93',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+        letterSpacing: '0.02em',
+        textTransform: 'uppercase',
+        borderBottom: '0.5px solid rgba(0,0,0,0.08)',
+      }}>
+        Project Images
+      </div>
+
+      {/* Image list */}
+      <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
+        {items.map((item, i) => (
+          <div
+            key={item.appId}
+            onClick={() => { saveLastOpened('finder_preview', item.appId); onOpenImage(item.appId); onClose() }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '6px 12px',
+              cursor: 'default',
+              borderBottom: i < items.length - 1 ? '0.5px solid rgba(0,0,0,0.05)' : 'none',
+              transition: 'background 0.08s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.06)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            {/* Thumbnail */}
+            <div style={{
+              width: 28,
+              height: 28,
+              borderRadius: 4,
+              overflow: 'hidden',
+              flexShrink: 0,
+              background: '#ddd',
+              border: '0.5px solid rgba(0,0,0,0.08)',
+            }}>
+              <img
+                src={item.src}
+                alt={item.label}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+            </div>
+            {/* Info */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontSize: '12.5px',
+                fontWeight: 500,
+                color: '#1c1c1e',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}>{item.label}</div>
+              <div style={{
+                fontSize: '10.5px',
+                color: '#8e8e93',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+              }}>{item.project}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
 
 
 
@@ -55,7 +180,7 @@ function useDockIconSize(mouseX, index, total) {
 
 
 
-function DockIcon({ icon, mouseX, openApps, onOpen, index, total }) {
+function DockIcon({ icon, mouseX, openApps, onOpen, index, total, onContextMenu }) {
   const [bouncing, setBouncing] = useState(false)
   const [imgError, setImgError] = useState(false)
   const [hovering, setHovering] = useState(false)
@@ -65,6 +190,11 @@ function DockIcon({ icon, mouseX, openApps, onOpen, index, total }) {
     if (bouncing) return
     setBouncing(true)
     setTimeout(() => { setBouncing(false); onOpen(icon.id) }, 1500)
+  }
+
+  function handleContextMenu(e) {
+    e.preventDefault()
+    if (onContextMenu) onContextMenu(e)
   }
 
   const isOpen = openApps.includes(icon.id)
@@ -104,6 +234,7 @@ function DockIcon({ icon, mouseX, openApps, onOpen, index, total }) {
 
       <motion.div
         onClick={handleClick}
+        onContextMenu={handleContextMenu}
         onHoverStart={() => setHovering(true)}
         onHoverEnd={() => setHovering(false)}
         style={{ width: springSize, height: springSize, y: lift, cursor: 'pointer', originY: 1, originX: 0.5, flexShrink: 0 }}
@@ -148,6 +279,11 @@ function DockIcon({ icon, mouseX, openApps, onOpen, index, total }) {
     </div>
   )
 }
+
+
+
+
+
 
 
 
@@ -273,6 +409,7 @@ function MinimizedTile({ win, onRestore, tileRef }) {
 
 const Dock = forwardRef(function Dock({ openApps, onOpen, minimizedWindows = [], onRestore }, dockRef) {
   const mouseX = useMotionValue(Infinity)
+  const [finderMenuOpen, setFinderMenuOpen] = useState(false)
 
   
   const tileRefs = useRef({})
@@ -326,7 +463,15 @@ const Dock = forwardRef(function Dock({ openApps, onOpen, minimizedWindows = [],
       >
         {}
         {activeIcons.map((icon, idx) => (
-          <motion.div key={icon.id} layout transition={dockSpring} style={{ flexShrink: 0 }}>
+          <motion.div key={icon.id} layout transition={dockSpring} style={{ flexShrink: 0, position: 'relative' }}>
+            <AnimatePresence>
+              {icon.id === 'Finder' && finderMenuOpen && (
+                <FinderContextMenu
+                  onOpenImage={(appId) => onOpen(appId)}
+                  onClose={() => setFinderMenuOpen(false)}
+                />
+              )}
+            </AnimatePresence>
             <DockIcon
               index={idx}
               total={activeIcons.length}
@@ -334,6 +479,7 @@ const Dock = forwardRef(function Dock({ openApps, onOpen, minimizedWindows = [],
               mouseX={mouseX}
               openApps={openApps}
               onOpen={onOpen}
+              onContextMenu={icon.id === 'Finder' ? () => setFinderMenuOpen(prev => !prev) : undefined}
             />
           </motion.div>
         ))}

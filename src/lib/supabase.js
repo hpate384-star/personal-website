@@ -24,3 +24,32 @@ export function getOrCreateSessionId() {
   }
   return id
 }
+
+export async function saveLastOpened(key, value) {
+  if (!supabase) return
+  try {
+    const sessionId = getOrCreateSessionId()
+    await supabase.from('last_opened').upsert(
+      { session_id: sessionId, key, value, updated_at: new Date().toISOString() },
+      { onConflict: 'session_id,key' }
+    )
+  } catch (e) {
+    console.error('[Supabase] saveLastOpened error:', e)
+  }
+}
+
+export async function getLastOpened(key) {
+  if (!supabase) return null
+  try {
+    const sessionId = getOrCreateSessionId()
+    const { data } = await supabase
+      .from('last_opened')
+      .select('value')
+      .eq('session_id', sessionId)
+      .eq('key', key)
+      .single()
+    return data?.value || null
+  } catch (e) {
+    return null
+  }
+}

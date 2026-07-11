@@ -3,6 +3,7 @@ import { WindowCtx } from '../Window'
 import DraggableItem from '../DraggableItem'
 import folderImg from '../../assets/finder.png'
 import { DocSVG, getInitialPos } from '../WindowContent'
+import { saveLastOpened } from '../../lib/supabase'
 
 
 import img1 from '../../assets/Snip/1.png'
@@ -255,7 +256,9 @@ export function ProjectsContent({ view, setView, constraintRef, itemPositions, s
             onClick={(clickedId, e) => handleItemClick(imgKey, e)}
             onDoubleClick={(clickedId, e) => {
               e.stopPropagation()
-              ctx?.openWindow?.(`Preview_${view}_${img.id}`)
+              const previewId = `Preview_${view}_${img.id}`
+              saveLastOpened('finder_preview', previewId)
+              ctx?.openWindow?.(previewId)
             }}
             onDragEnd={handleItemDragEnd}
             onBatchDragEnd={handleBatchDragEnd}

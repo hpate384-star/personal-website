@@ -11,6 +11,7 @@ import SpotifyNowPlayingWidget from './components/SpotifyNowPlayingWidget'
 import { getWindowContent } from './components/WindowContent'
 import { captureSnapshot } from './lib/captureSnapshot'
 import { getNextZIndex } from './lib/zIndex'
+import { getLastOpened } from './lib/supabase'
 
 const BASE_WINDOW_X = 120
 const BASE_WINDOW_Y = 48
@@ -89,62 +90,68 @@ export default function App() {
       return
     }
 
-    const matchesApp = (w, targetApp) => {
-      if (targetApp === 'Notes' || targetApp.startsWith('Notes_')) {
-        return w.app === 'Notes' || w.app.startsWith('Notes_')
-      }
-      return w.app === targetApp
+    // For the Preview dock icon, open the last viewed image from Supabase
+    if (app === 'Preview') {
+      getLastOpened('finder_preview').then(lastId => {
+        doOpenWindow(lastId || 'Preview')
+      })
+      return
     }
-    
-    setWindows(prev => {
-      
-      const openMatches = prev.filter(w => matchesApp(w, app) && !w.minimized && !w.isClosing)
-      if (openMatches.length > 0) {
-        
-        const topMatch = openMatches.sort((a, b) => b.zIndex - a.zIndex)[0]
-        
-        return prev.map(w => w.id === topMatch.id ? { ...w, app: app.startsWith('Notes_') ? app : w.app, zIndex: getNextZIndex() } : w)
+
+    doOpenWindow(app)
+
+    function doOpenWindow(targetApp) {
+      const matchesApp = (w, t) => {
+        if (t === 'Notes' || t.startsWith('Notes_')) return w.app === 'Notes' || w.app.startsWith('Notes_')
+        if (t === 'Preview' || t.startsWith('Preview_')) return w.app === 'Preview' || w.app.startsWith('Preview_')
+        return w.app === t
       }
 
-      const minimizedMatches = prev.filter(w => matchesApp(w, app) && (w.minimized || w.isClosing))
-      if (minimizedMatches.length > 0) {
-        const topMin = minimizedMatches.sort((a, b) => b.zIndex - a.zIndex)[0]
-        return prev.map(w => w.id === topMin.id ? { ...w, app: app.startsWith('Notes_') ? app : w.app, minimized: false, isClosing: false, zIndex: getNextZIndex() } : w)
-      }
-
-      const pos = getInitialPosition(openCountRef.current++)
-      const baseApp = app.startsWith('Notes_') ? 'Notes' : app.startsWith('Preview_') ? 'Preview' : app
-      const appSize = WINDOW_SIZES[baseApp] || { width: 720, height: 480 }
-      
-      let title = WINDOW_TITLES[app] || app
-      if (app.startsWith('Notes_')) {
-        title = `${app.split('_')[1]}.txt`
-      } else if (app.startsWith('Preview_')) {
-        
-        title = 'Preview'
-      }
-
-      return [...prev, {
-        id: `${app}-${Date.now()}`, app,
-        title,
-        ...pos, ...appSize,
-        zIndex: getNextZIndex(), minimized: false, isClosing: false,
-        snapshot: null, traySlotX: null, traySlotY: null,
-      }]
-    })
-    setActiveApp(app)
-
-    
-    setTimeout(() => {
       setWindows(prev => {
-        const openMatches = prev.filter(w => matchesApp(w, app) && !w.minimized && !w.isClosing)
+        const openMatches = prev.filter(w => matchesApp(w, targetApp) && !w.minimized && !w.isClosing)
         if (openMatches.length > 0) {
           const topMatch = openMatches.sort((a, b) => b.zIndex - a.zIndex)[0]
-          return prev.map(w => w.id === topMatch.id ? { ...w, zIndex: getNextZIndex() } : w)
+          return prev.map(w => w.id === topMatch.id ? { ...w, app: targetApp.startsWith('Notes_') || targetApp.startsWith('Preview_') ? targetApp : w.app, zIndex: getNextZIndex() } : w)
         }
-        return prev
+
+        const minimizedMatches = prev.filter(w => matchesApp(w, targetApp) && (w.minimized || w.isClosing))
+        if (minimizedMatches.length > 0) {
+          const topMin = minimizedMatches.sort((a, b) => b.zIndex - a.zIndex)[0]
+          return prev.map(w => w.id === topMin.id ? { ...w, app: targetApp.startsWith('Notes_') || targetApp.startsWith('Preview_') ? targetApp : w.app, minimized: false, isClosing: false, zIndex: getNextZIndex() } : w)
+        }
+
+        const pos = getInitialPosition(openCountRef.current++)
+        const baseApp = targetApp.startsWith('Notes_') ? 'Notes' : targetApp.startsWith('Preview_') ? 'Preview' : targetApp
+        const appSize = WINDOW_SIZES[baseApp] || { width: 720, height: 480 }
+
+        let title = WINDOW_TITLES[targetApp] || targetApp
+        if (targetApp.startsWith('Notes_')) {
+          title = `${targetApp.split('_')[1]}.txt`
+        } else if (targetApp.startsWith('Preview_')) {
+          title = 'Preview'
+        }
+
+        return [...prev, {
+          id: `${targetApp}-${Date.now()}`, app: targetApp,
+          title,
+          ...pos, ...appSize,
+          zIndex: getNextZIndex(), minimized: false, isClosing: false,
+          snapshot: null, traySlotX: null, traySlotY: null,
+        }]
       })
-    }, 50)
+      setActiveApp(targetApp)
+
+      setTimeout(() => {
+        setWindows(prev => {
+          const openMatches = prev.filter(w => matchesApp(w, targetApp) && !w.minimized && !w.isClosing)
+          if (openMatches.length > 0) {
+            const topMatch = openMatches.sort((a, b) => b.zIndex - a.zIndex)[0]
+            return prev.map(w => w.id === topMatch.id ? { ...w, zIndex: getNextZIndex() } : w)
+          }
+          return prev
+        })
+      }, 50)
+    }
   }, [])
 
   const closeWindow = useCallback((id) => updateWindow(id, { isClosing: true }), [updateWindow])

@@ -124,3 +124,28 @@ CREATE TRIGGER update_widget_positions_updated_at
   BEFORE UPDATE ON widget_positions
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
+
+-- Table for tracking last opened item per session (e.g., last Preview image)
+CREATE TABLE IF NOT EXISTS last_opened (
+  session_id TEXT NOT NULL,
+  key TEXT NOT NULL,
+  value TEXT NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  PRIMARY KEY (session_id, key)
+);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE last_opened ENABLE ROW LEVEL SECURITY;
+
+-- Create policy to allow public access
+CREATE POLICY "Allow public access to last_opened"
+  ON last_opened
+  FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+-- Trigger for automatic timestamp updates
+CREATE TRIGGER update_last_opened_updated_at
+  BEFORE UPDATE ON last_opened
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
