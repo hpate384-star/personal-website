@@ -487,7 +487,7 @@ export function IMessageContent() {
           ];
           if (savedName) {
             reconstructed.push({ id: 'init-1', isMe: true, text: savedName, tail: true, timestamp: new Date(baseTime.getTime() - 5000) });
-            reconstructed.push({ id: 'init-2', isMe: false, text: `Nice to meet you, ${savedName}! What would you like to say? (Drop your email so I can reply!)`, tail: true, timestamp: new Date(baseTime.getTime()) });
+            reconstructed.push({ id: 'init-2', isMe: false, text: `Nice to meet you, ${savedName}! What would you like to say? (Drop your email as well)`, tail: true, timestamp: new Date(baseTime.getTime()) });
           }
 
           setUiMsgs(reconstructed);
@@ -555,7 +555,7 @@ export function IMessageContent() {
 
       setTimeout(() => {
         setIsTyping(false);
-        const replyText = `Nice to meet you, ${text}! What would you like to say? (Drop your email so I can reply!)`;
+        const replyText = `Nice to meet you, ${text}! What would you like to say? (Drop your email as well)`;
         setUiMsgs(prev => [
           ...prev,
           { id: newId + '-reply', isMe: false, text: replyText, tail: true, timestamp: new Date() },
@@ -583,7 +583,7 @@ export function IMessageContent() {
         setIsTyping(true);
         setTimeout(() => {
           setIsTyping(false);
-          const ackText = "Got it! I'll reply shortly. Keep an eye here — my replies will show up live! 👀";
+          const ackText = "Got it! I'll reply shortly. Keep an eye here, my replies will show up live! 👀";
           setChatMsgs(prev => [
             ...prev,
             { id: newId + '-ack', isMe: false, text: ackText, tail: true, timestamp: new Date() },
