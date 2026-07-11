@@ -24,6 +24,10 @@ import nImg3 from '../../assets/nouri/3.png'
 import nImg4 from '../../assets/nouri/4.png'
 import nImg5 from '../../assets/nouri/5.png'
 
+import chatrlinkImg1 from '../../assets/chatrlink/argocd-infastructure.png'
+import chatrlinkImg2 from '../../assets/chatrlink/cluster-infastructure.png'
+import chatrlinkImg3 from '../../assets/chatrlink/message-page.png'
+
 import githubIcon from '../../assets/github.svg'
 
 export const PROJECTS_DATA = {
@@ -69,6 +73,17 @@ export const PROJECTS_DATA = {
       { id: '5', src: nImg5.src || nImg5, label: '5.png' }
     ],
     githubUrl: 'https://github.com/Hetp04/Nouri'
+  },
+  Chatrlink: {
+    folderName: 'Chatrlink',
+    fileName: 'Chatrlink_Details.txt',
+    title: 'Real-Time Chat Application',
+    content: `• Developed a real-time chat application using Spring Boot and React, implementing WebSockets for instant message delivery and MongoDB to persist chat history.\n\n• Deployed the application on a Kubernetes cluster, configuring separate frontend and backend services (2 replicas each) using ClusterIP and an Ingress controller for load balancing, traffic routing, and support for 1,000+ concurrent users.\n\n• Configured the GitHub Actions workflow to automatically extract Git commit SHAs to tag Docker images, writing these new versions into GitLab Helm charts for automated deployment via Argo CD.`,
+    images: [
+      { id: 'img1', src: chatrlinkImg1.src || chatrlinkImg1, label: 'argocd-infastructure.png' },
+      { id: 'img2', src: chatrlinkImg2.src || chatrlinkImg2, label: 'cluster-infastructure.png' },
+      { id: 'img3', src: chatrlinkImg3.src || chatrlinkImg3, label: 'message-page.png' },
+    ]
   }
 }
 
