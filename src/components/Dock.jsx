@@ -51,7 +51,9 @@ function FinderContextMenu({ onOpenImage, onClose }) {
 
   useEffect(() => {
     const handleClick = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) onClose()
+      if (menuRef.current && !menuRef.current.contains(e.target) && !e.target.closest('[data-dock-icon="Finder"]')) {
+        onClose()
+      }
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -239,6 +241,7 @@ function DockIcon({ icon, mouseX, openApps, onOpen, index, total, onContextMenu 
         onHoverEnd={() => setHovering(false)}
         style={{ width: springSize, height: springSize, y: lift, cursor: 'pointer', originY: 1, originX: 0.5, flexShrink: 0 }}
         whileTap={{ scale: 0.88 }}
+        data-dock-icon={icon.id}
       >
         <motion.div
           animate={bouncing ? {
