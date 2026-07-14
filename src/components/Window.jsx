@@ -54,7 +54,7 @@ function useDrag(initial, id, onDragStop) {
   return { pos, onMouseDown }
 }
 
-function useResize(initial) {
+function useResize(initial, minWidth = 400, minHeight = 300) {
   const [size, setSize] = useState(initial)
   const start = useRef({ mouseX: 0, mouseY: 0, w: 0, h: 0 })
 
@@ -64,8 +64,8 @@ function useResize(initial) {
     start.current = { mouseX: e.clientX, mouseY: e.clientY, w: size.w, h: size.h }
 
     const onMove = (e) => setSize({
-      w: Math.max(400, start.current.w + e.clientX - start.current.mouseX),
-      h: Math.max(300, start.current.h + e.clientY - start.current.mouseY),
+      w: Math.max(minWidth, start.current.w + e.clientX - start.current.mouseX),
+      h: Math.max(minHeight, start.current.h + e.clientY - start.current.mouseY),
     })
     const onUp = () => {
       window.removeEventListener('mousemove', onMove)
@@ -80,6 +80,7 @@ function useResize(initial) {
 
 export default function Window({
   id, app, title, x, y, width, height,
+  minWidth, minHeight,
   zIndex, minimized, isClosing,
   onClose, onFullyClosed, onMinimize, onFocus, onDragStop, onOpenWindow,
   traySlotX, traySlotY,
@@ -88,7 +89,7 @@ export default function Window({
   children
 }) {
   const { pos, onMouseDown: onTitleBarMouseDown } = useDrag({ x, y }, id, onDragStop)
-  const { size, onMouseDown: onResizeMouseDown } = useResize({ w: width, h: height })
+  const { size, onMouseDown: onResizeMouseDown } = useResize({ w: width, h: height }, minWidth, minHeight)
 
   const isCustomTitleBar = app === 'Finder' || app === 'iMessage' || app.startsWith('Notes') || app.startsWith('Preview')
 

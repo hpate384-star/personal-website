@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gallery View</title>
+    <style>
+        body { font-family: sans-serif; }
+        .grid { display: flex; flex-wrap: wrap; gap: 20px; }
+        .item { border: 1px solid #ccc; padding: 10px; width: 300px; }
+        img { max-width: 100%; height: auto; }
+        h3 { font-size: 14px; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>Gallery Items</h1>
+    <div class="grid" id="grid"></div>
+    <script>
+        // List of missing files
+        const files = [
+            "6E979A24-4273-4D85-8CE9-AA678082A688.JPG",
+            "IMG_0813.jpg",
+            "IMG_1040.jpg",
+            "IMG_1057.JPG",
+            "IMG_1126.JPG",
+            "IMG_1260.jpg",
+            "IMG_1311.jpg",
+            "IMG_1448.JPG",
+            "IMG_1456.jpg",
+            "IMG_1555.JPG",
+            "IMG_1623.JPG",
+            "IMG_1657.JPG",
+            "IMG_1808.jpg",
+            "IMG_3729.jpg",
+            "IMG_4103.jpg"
+        ];
+        
+        const grid = document.getElementById('grid');
+        files.forEach(f => {
+            const div = document.createElement('div');
+            div.className = 'item';
+            div.innerHTML = `
+                <img src="/assets/gallery/${f}" />
+                <h3>${f}</h3>
+            `;
+            grid.appendChild(div);
+        });
+    </script>
+</body>
+</html>

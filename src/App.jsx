@@ -33,6 +33,7 @@ const WINDOW_SIZES = {
   iMessage: { width: 840, height: 560 },
   Notes: { width: 840, height: 520 },
   Preview: { width: 1000, height: 750 },
+  Photos: { width: 1050, height: 700, minWidth: 912, minHeight: 600 },
 }
 
 export default function App() {
@@ -291,6 +292,10 @@ export default function App() {
         <Window
           key={win.id}
           {...win}
+          width={win.width}
+          height={win.height}
+          minWidth={WINDOW_SIZES[win.app]?.minWidth}
+          minHeight={WINDOW_SIZES[win.app]?.minHeight}
           onClose={closeWindow}
           onFullyClosed={fullyRemoveWindow}
           onMinimize={minimizeWindow}
